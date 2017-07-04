@@ -60,10 +60,8 @@ class KNearestNeighbor(object):
       is the Euclidean distance between the ith test point and the jth training
       point.
     """
-    import math
     num_test = X.shape[0]
     num_train = self.X_train.shape[0]
-    from scipy.spatial import distance
     dists = np.zeros((num_test, num_train))
     for i in xrange(num_test):
       for j in xrange(num_train):
@@ -74,16 +72,8 @@ class KNearestNeighbor(object):
         # training point, and store the result in dists[i, j]. You should   #
         # not use a loop over dimension.                                    #
         #####################################################################
-        #dist = [(X.item(i) - self.X_train.item(j)) ** 2]
-
-        dist = np.sqrt(np.sum(np.square(X[i] - self.X_train[j])))
+        dist = np.sqrt(np.sum(np.square(self.X_train[j] - X[i])))
         dists[i, j] = dist
-
-        # dist = (X[i] - self.X_train[j]) ** 2
-        # dist = math.sqrt(sum(dist))
-        # dists[i,j] = dist
-
-        #dists [i,j] = distance.euclidean(X[i], self.X_train[j])
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -105,8 +95,7 @@ class KNearestNeighbor(object):
       # Compute the l2 distance between the ith test point and all training #
       # points, and store the result in dists[i, :].                        #
       #######################################################################
-
-      dists[i, :] = np.sqrt(np.sum(np.square(X[i] - self.X_train)))
+      dists[i, :] = np.sqrt(np.sum(np.square(self.X_train - X[i]), axis=1))
       #######################################################################
       #                         END OF YOUR CODE                            #
       #######################################################################
@@ -134,7 +123,11 @@ class KNearestNeighbor(object):
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    pass
+    test_sum = np.sum(np.square(X), axis=1)  # num_test x 1
+    train_sum = np.sum(np.square(self.X_train), axis=1)  # num_train x 1
+    inner_product = np.dot(X, self.X_train.T)  # num_test x num_train
+    dists = np.sqrt(-2 * inner_product + test_sum.reshape(-1, 1) + train_sum)  # broadcast
+
     #########################################################################
     #                         END OF YOUR CODE                              #
     #########################################################################
